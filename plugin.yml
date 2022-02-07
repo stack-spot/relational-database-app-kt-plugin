@@ -1,0 +1,39 @@
+name: "relational-database-app-kt-plugin"
+description: Configure database connection to a relational database and optionally migration during application startup
+types:
+  - app
+languages:
+  - "kotlin"
+tags:
+  - "relational-database"
+  - "migration"
+  - "flyway"
+  - "liquibase"
+inputs:
+  - label: "Data source name: "
+    type: text
+    name: "datasource_name"
+
+  - label: "Database url: "
+    type: text
+    name: "datasource_url"
+    default: "jdbc:postgresql://localhost:5432/db"
+
+  - label: "Username: "
+    type: text
+    name: "datasource_username"
+    default: "root"
+
+  - label: "Which migration tool would you like to use with this datasource?"
+    type: "text"
+    name: "migration_tool"
+    default: "None"
+    items:
+      - "Flyway"
+      - "Liquibase"
+      - "None"
+
+computedInputs:
+  datasource_class: "{{inputs.datasource_name|to_camel}}"
+  repository_path: "{{inputs.datasource_name|lower}}.repository"
+  dbms: "{{inputs.datasource_url.split(':')[1]}}"
