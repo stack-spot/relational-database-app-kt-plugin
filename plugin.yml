@@ -10,7 +10,6 @@ tags:
   - "flyway"
   - "liquibase"
 inputs:
-inputs:
   - label: "Which database would you like to use?"
     type: text
     name: "dbms"
@@ -28,4 +27,3 @@ inputs:
       - "Flyway"
       - "Liquibase"
       - "None"
-
