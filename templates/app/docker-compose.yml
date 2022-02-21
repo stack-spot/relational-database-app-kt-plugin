@@ -1,0 +1,45 @@
+{%-
+    set dbmsDict = {
+        'MariaDB': ['jdbc:mariadb://mariadb-server:3306/test', 'mariadb:10.5', '3306:3306', '/var/lib/mysql'],
+        'MySQL': ['jdbc:mysql://mysql-server:3306/test', 'mysql:8.0', '3306:3306', '/var/lib/mysql'],
+        'PostgreSQL': ['jdbc:postgresql://postgresql-server:5432/test', 'postgres:13.4-alpine', '5432:5432', '/var/lib/postgresql/data']
+    }
+-%}
+version: '3.8'
+
+services:
+
+  {{project_name}}:
+    environment:
+      - SPRING_DATASOURCE_URL={{dbmsDict[inputs.dbms][0]}}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    depends_on:
+      - {{inputs.dbms|lower}}-server
+    volumes:
+      - ./wait-for.sh:/opt/app/wait-for.sh
+    entrypoint: call_wait_for_here
+
+  {{inputs.dbms|lower}}-server:
+    image: {{dbmsDict[inputs.dbms][1]}}
+    ports:
+      - "{{dbmsDict[inputs.dbms][2]}}"
+    environment:
+    {% if inputs.dbms == "PostgreSQL" %}
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - POSTGRES_DB=test
+    {% else %}
+      - {{inputs.dbms|upper}}_RANDOM_ROOT_PASSWORD=true
+      - {{inputs.dbms|upper}}_USER=user
+      - {{inputs.dbms|upper}}_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - {{inputs.dbms|upper}}_DATABASE=test
+    {% endif %}
+    volumes:
+      - {{inputs.dbms|lower}}-volume:{{dbmsDict[inputs.dbms][3]}}
+
+networks:
+  default:
+    driver: bridge
+
+volumes:
+  {{inputs.dbms|lower}}-volume:

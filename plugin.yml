@@ -1,5 +1,5 @@
 name: "relational-database-app-kt-plugin"
-description: Configure database connection to a relational database and optionally migration during application startup
+description: Configure database connection to a relational database through supported drivers (MariaDB, MySQL, PostgreSQL) and optionally migration during application startup
 types:
   - app
 languages:
@@ -10,19 +10,15 @@ tags:
   - "flyway"
   - "liquibase"
 inputs:
-  - label: "Data source name: "
+inputs:
+  - label: "Which database would you like to use?"
     type: text
-    name: "datasource_name"
-
-  - label: "Database url: "
-    type: text
-    name: "datasource_url"
-    default: "jdbc:postgresql://localhost:5432/db"
-
-  - label: "Username: "
-    type: text
-    name: "datasource_username"
-    default: "root"
+    name: "dbms"
+    default: "PostgreSQL"
+    items:
+      - "MariaDB"
+      - "MySQL"
+      - "PostgreSQL"
 
   - label: "Which migration tool would you like to use with this datasource?"
     type: "text"
@@ -33,7 +29,3 @@ inputs:
       - "Liquibase"
       - "None"
 
-computedInputs:
-  datasource_class: "{{inputs.datasource_name|to_camel}}"
-  repository_path: "{{inputs.datasource_name|lower}}.repository"
-  dbms: "{{inputs.datasource_url.split(':')[1]}}"

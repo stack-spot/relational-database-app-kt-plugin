@@ -1,0 +1,2 @@
+paths-ignore:
+  - 'templates/app/src/main/resources/application.properties'
