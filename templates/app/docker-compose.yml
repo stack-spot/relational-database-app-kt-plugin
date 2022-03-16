@@ -9,7 +9,7 @@ version: '3.8'
 
 services:
 
-  {{project_name}}:
+  {{project_name|lower}}:
     environment:
       - SPRING_DATASOURCE_URL={{dbmsDict[inputs.dbms][0]}}
       - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}

@@ -6,10 +6,11 @@ Also allows setup of a supported migration tool.
 ### Supported DBMS:
 - MariaDB
 - MySQL
-- Oracle Database
 - PostgreSQL
-- SQL Server
 
 ### Supported migration tools:
 - Flyway
 - Liquibase
+
+### CDK:
+This plugin also provide a CDK code to provision a RDS database instance with a basic configuration according to the chosen DBMS.

@@ -27,3 +27,15 @@ inputs:
       - "Flyway"
       - "Liquibase"
       - "None"
+
+hooks:
+  - type: edit
+    trigger: after-render
+    path: infra/src/main/kotlin/{{project_group_id|group_id_folder}}/{{project_name|to_camel}}CdkStack.kt
+    changes:
+      - search:
+          pattern: 'init\s?{'
+          insert-after:
+            value: "        RdsNestedStack(this, \"{{project_name|to_camel}}RdsNestedStack\", stageObject)\n"
+          when:
+            not-exists: 'RdsNestedStack(this, "{{project_name|to_camel}}RdsNestedStack", stageObject)'

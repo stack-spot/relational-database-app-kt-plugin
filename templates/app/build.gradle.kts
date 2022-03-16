@@ -23,4 +23,5 @@ dependencies {
     {% if inputs.migration_tool in migrationDict  %}
     runtimeOnly("{{migrationDict[inputs.migration_tool]}}")
     {% endif %}
+    implementation("com.amazonaws.secretsmanager:aws-secretsmanager-jdbc:1.0.7")
 }
