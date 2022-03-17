@@ -36,6 +36,12 @@ hooks:
       - search:
           pattern: 'init\s?{'
           insert-after:
-            value: "        RdsNestedStack(this, \"{{project_name|to_camel}}RdsNestedStack\", stageObject)\n"
+            value: "        val rdsNestedStack = RdsNestedStack(this, \"{{project_name|to_camel}}RdsNestedStack\", stageObject)\n"
           when:
-            not-exists: 'RdsNestedStack(this, "{{project_name|to_camel}}RdsNestedStack", stageObject)'
+            not-exists: 'val rdsNestedStack = RdsNestedStack(this, "{{project_name|to_camel}}RdsNestedStack", stageObject)'
+      - search:
+          string: 'val accountRole = cluster.addServiceAccount("account", accountOptions).role'
+          insert-after:
+            value: "        rdsNestedStack.secret.grantRead(accountRole)\n"
+          when:
+            not-exists: 'rdsNestedStack.secret.grantRead(accountRole)'

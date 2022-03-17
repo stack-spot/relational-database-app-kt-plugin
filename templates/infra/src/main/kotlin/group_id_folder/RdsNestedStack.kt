@@ -27,9 +27,12 @@ import software.amazon.awscdk.services.rds.Credentials
 import software.amazon.awscdk.services.rds.DatabaseInstance
 import software.amazon.awscdk.services.rds.DatabaseInstanceEngine
 import software.amazon.awscdk.services.rds.{{driverDict[inputs.dbms][0]}}
+import software.amazon.awscdk.services.secretsmanager.ISecret
 import software.constructs.Construct
 
 class RdsNestedStack(scope: Construct, id: String, stage: Stage) : NestedStack(scope, id, NestedStackProps.builder().build()) {
+    val secret: ISecret
+
     init {
         val vpcId = stage.cloud.vpcId ?: throw IllegalStateException("The attribute cloud.vpcId is not present in the stage")
         val securityGroupOutputKey = stage.outputs?.get("securityGroupId")
@@ -59,11 +62,12 @@ class RdsNestedStack(scope: Construct, id: String, stage: Stage) : NestedStack(s
             .instanceType(InstanceType.of(InstanceClass.BURSTABLE3, InstanceSize.MICRO))
             .build()
 
-        rdsDB.secret?.let {
-          Manifests.env["SPRING_DATASOURCE_URL"] = EnvValue.fromValue("jdbc-secretsmanager:{{driverDict[inputs.dbms][4]}}://${rdsDB.dbInstanceEndpointAddress}/$databaseName")
-          Manifests.env["SPRING_DATASOURCE_USERNAME"] = EnvValue.fromValue(it.secretName)
-          Manifests.env["SPRING_DATASOURCE_DRIVER_CLASS_NAME"] = EnvValue.fromValue("com.amazonaws.secretsmanager.sql.{{driverDict[inputs.dbms][3]}}")
-        } ?: throw IllegalStateException("Failed to create the Secret Manager")
+        this.secret = rdsDB.secret ?: throw IllegalStateException("Failed to create the Secret Manager")
+        Manifests.env["SPRING_DATASOURCE_URL"] =
+            EnvValue.fromValue("jdbc-secretsmanager:postgresql://${rdsDB.dbInstanceEndpointAddress}/$databaseName")
+        Manifests.env["SPRING_DATASOURCE_USERNAME"] = EnvValue.fromValue(this.secret.secretName)
+        Manifests.env["SPRING_DATASOURCE_DRIVER_CLASS_NAME"] =
+            EnvValue.fromValue("com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver")
 
         CfnOutput.Builder.create(this, "$stackName-arn-rds").value(rdsDB.instanceArn).exportName("$stackName-arn-rds").build()
     }
