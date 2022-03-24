@@ -63,11 +63,9 @@ class RdsNestedStack(scope: Construct, id: String, stage: Stage) : NestedStack(s
             .build()
 
         this.secret = rdsDB.secret ?: throw IllegalStateException("Failed to create the Secret Manager")
-        Manifests.env["SPRING_DATASOURCE_URL"] =
-            EnvValue.fromValue("jdbc-secretsmanager:postgresql://${rdsDB.dbInstanceEndpointAddress}/$databaseName")
+        Manifests.env["SPRING_DATASOURCE_URL"] = EnvValue.fromValue("jdbc-secretsmanager:{{driverDict[inputs.dbms][4]}}://${rdsDB.dbInstanceEndpointAddress}/$databaseName")
         Manifests.env["SPRING_DATASOURCE_USERNAME"] = EnvValue.fromValue(this.secret.secretName)
-        Manifests.env["SPRING_DATASOURCE_DRIVER_CLASS_NAME"] =
-            EnvValue.fromValue("com.amazonaws.secretsmanager.sql.AWSSecretsManagerPostgreSQLDriver")
+        Manifests.env["SPRING_DATASOURCE_DRIVER_CLASS_NAME"] = EnvValue.fromValue("com.amazonaws.secretsmanager.sql.{{driverDict[inputs.dbms][3]}}")
 
         CfnOutput.Builder.create(this, "$stackName-arn-rds").value(rdsDB.instanceArn).exportName("$stackName-arn-rds").build()
     }
